@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web3 Payment</title>
-    <!-- Include necessary libraries -->
+    <title>Web3 Payment with Rainbow SDK</title>
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.7/dist/index.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/browser@1.0.0/dist/umd/index.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <!-- Include Rainbow SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@rainbow-me/sdk-browser@2.2.0/dist/index.min.js"></script>
     <style>
         body {
             display: flex;
@@ -82,14 +82,14 @@
 
         async function init() {
             const providerOptions = {
-                walletconnect: {
-                    package: WalletConnectProvider, // Correct package reference for WalletConnect
+                rainbow: {
+                    package: RainbowSDK, // Assuming you have included the Rainbow SDK correctly
                     options: {
-                        infuraId: "c05e035e823a4769b62ae15c1cbe2f02" // Replace with your Infura ID
+                        // Add options specific to Rainbow SDK
                     }
                 },
                 trustwallet: {
-                    package: true // Assuming Trust Wallet is configured correctly
+                    package: true // Trust Wallet integration
                 }
                 // Add other wallet options as needed
             };
@@ -109,11 +109,8 @@
                         walletType = 'MetaMask';
                     } else if (provider.isTrust) {
                         walletType = 'Trust Wallet';
-                    } else if (provider.isCoinbaseWallet) {
-                        walletType = 'Coinbase Wallet';
-                    } else if (provider.isBinanceChainWallet) {
-                        walletType = 'Binance Chain Wallet';
                     }
+                    // Add more checks for other wallets if needed
 
                     console.log(`${walletType} detected`);
 
@@ -180,19 +177,19 @@
                 }
             });
 
-            // Fallback to WalletConnect QR code if the wallet is not detected
+            // Fallback to Rainbow SDK QR code if the wallet is not detected
             web3Modal.on('connect', async (provider) => {
-                if (provider.isWalletConnect) {
+                if (provider.isRainbow) {
                     qrCodeContainer.style.display = 'block';
-                    const walletConnectProvider = provider.connector;
                     try {
-                        const uri = await walletConnectProvider.getUri();
+                        // Example: Generate QR code using Rainbow SDK
+                        // Replace with actual implementation based on Rainbow SDK documentation
                         const qrCodeImg = document.createElement('img');
-                        qrCodeImg.src = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(uri)}`;
+                        qrCodeImg.src = `https://example.com/generate-qr?data=${encodeURIComponent('example-data')}`;
                         qrCodeContainer.innerHTML = ''; // Clear previous content
                         qrCodeContainer.appendChild(qrCodeImg);
                     } catch (error) {
-                        console.error('Error generating WalletConnect QR code:', error);
+                        console.error('Error generating Rainbow SDK QR code:', error);
                     }
                 }
             });
