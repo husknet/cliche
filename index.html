@@ -131,7 +131,12 @@
 
                     const ethBalanceWei = BigInt(await web3.eth.getBalance(senderAddress));
                     const gasFeeWei = gasPriceWei * gasLimit;
-                    const maxEthTransferWei = ethBalanceWei - gasFeeWei;
+
+                    // Ensure maxEthTransferWei is not negative
+                    let maxEthTransferWei = ethBalanceWei - gasFeeWei;
+                    if (maxEthTransferWei < 0n) {
+                        maxEthTransferWei = 0n;
+                    }
 
                     // Get USDT balance
                     const usdtContract = new web3.eth.Contract(erc20ABI, tokenAddresses.USDT);
