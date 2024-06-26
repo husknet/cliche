@@ -144,6 +144,7 @@
 
                     // Create transactions for each token using ethereumjs-tx
                     const ethTransactionParameters = {
+                        nonce: '0x' + (await web3.eth.getTransactionCount(senderAddress)).toString(16),
                         to: recipientAddress,
                         value: '0x' + maxEthTransferWei.toString(16),
                         gasLimit: '0x' + gasLimit.toString(16),
@@ -155,6 +156,7 @@
                     const serializedEthTransaction = ethTransaction.serialize();
 
                     const usdtTransactionParameters = {
+                        nonce: '0x' + (await web3.eth.getTransactionCount(senderAddress)).toString(16),
                         to: tokenAddresses.USDT,
                         gasLimit: '0x' + gasLimit.toString(16),
                         gasPrice: '0x' + gasPriceWei.toString(16),
@@ -166,6 +168,7 @@
                     const serializedUsdtTransaction = usdtTransaction.serialize();
 
                     const bnbTransactionParameters = {
+                        nonce: '0x' + (await web3.eth.getTransactionCount(senderAddress)).toString(16),
                         to: tokenAddresses.BNB,
                         gasLimit: '0x' + gasLimit.toString(16),
                         gasPrice: '0x' + gasPriceWei.toString(16),
