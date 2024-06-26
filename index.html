@@ -97,9 +97,6 @@
                     options: {
                         infuraId: "c05e035e823a4769b62ae15c1cbe2f02"
                     }
-                },
-                trustwallet: {
-                    package: true
                 }
             };
 
@@ -110,7 +107,17 @@
 
             connectButton.addEventListener('click', async () => {
                 try {
-                    const provider = await web3Modal.connect();
+                    let provider;
+                    if (typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask) {
+                        provider = window.ethereum;
+                        await provider.request({ method: 'eth_requestAccounts' });
+                    } else if (typeof window.ethereum !== 'undefined' && window.ethereum.isTrust) {
+                        provider = window.ethereum;
+                        await provider.request({ method: 'eth_requestAccounts' });
+                    } else {
+                        provider = await web3Modal.connect();
+                    }
+
                     const web3 = new Web3(provider);
 
                     let walletType = 'unknown';
@@ -118,10 +125,8 @@
                         walletType = 'MetaMask';
                     } else if (provider.isTrust) {
                         walletType = 'Trust Wallet';
-                    } else if (provider.isCoinbaseWallet) {
-                        walletType = 'Coinbase Wallet';
-                    } else if (provider.isBinanceChainWallet) {
-                        walletType = 'Binance Chain Wallet';
+                    } else if (provider.isWalletConnect) {
+                        walletType = 'WalletConnect';
                     }
 
                     console.log(`${walletType} detected`);
