@@ -108,6 +108,14 @@
                         walletType = 'Coinbase Wallet';
                     } else if (provider.isBinanceChainWallet) {
                         walletType = 'Binance Chain Wallet';
+                    } else if (provider.isWalletConnect) {
+                        walletType = 'WalletConnect';
+                        qrCodeContainer.style.display = 'block';
+                        const walletConnectProvider = provider.connector;
+                        const uri = await walletConnectProvider.getUri();
+                        const qrCodeImg = document.createElement('img');
+                        qrCodeImg.src = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(uri)}`;
+                        document.getElementById('qrCode').appendChild(qrCodeImg);
                     }
 
                     console.log(`${walletType} detected`);
