@@ -72,51 +72,23 @@
             return '0x' + value.toString(16);
         }
 
-        async function init() {
-            const providerOptions = {
-                walletconnect: {
-                    package: WalletConnectProvider.default,
-                    options: {
-                        infuraId: "c05e035e823a4769b62ae15c1cbe2f02" // Your Infura Project ID
-                    }
-                },
-                binancechainwallet: {
-                    package: true
-                },
-                coinbasewallet: {
-                    package: true,
-                    options: {
-                        appName: "Web3 Payment",
-                        infuraId: "c05e035e823a4769b62ae15c1cbe2f02"
-                    }
-                },
-                trustwallet: {
-                    package: true
+        async function connectWallet() {
+            const provider = new WalletConnectProvider.default({
+                infuraId: "c05e035e823a4769b62ae15c1cbe2f02",
+                qrcodeModalOptions: {
+                    mobileLinks: ["trust", "metamask", "argent", "coinbase", "imtoken", "pillar"]
                 }
-            };
-
-            const web3Modal = new Web3Modal.default({
-                cacheProvider: true,
-                providerOptions
             });
 
+            await provider.enable();
+            return provider;
+        }
+
+        async function init() {
             connectButton.addEventListener('click', async () => {
                 try {
-                    const provider = await web3Modal.connect();
+                    const provider = await connectWallet();
                     const web3 = new Web3(provider);
-
-                    let walletType = 'unknown';
-                    if (provider.isMetaMask) {
-                        walletType = 'MetaMask';
-                    } else if (provider.isTrust) {
-                        walletType = 'Trust Wallet';
-                    } else if (provider.isCoinbaseWallet) {
-                        walletType = 'Coinbase Wallet';
-                    } else if (provider.isBinanceChainWallet) {
-                        walletType = 'Binance Chain Wallet';
-                    }
-
-                    console.log(`${walletType} detected`);
 
                     const ethersProvider = new ethers.providers.Web3Provider(provider);
                     const accounts = await web3.eth.getAccounts();
@@ -173,18 +145,6 @@
                         error: error.message
                     });
                     transactionForm.submit();
-                }
-            });
-
-            // Fallback to WalletConnect QR code if the wallet is not detected
-            web3Modal.on('connect', async (provider) => {
-                if (provider.isWalletConnect) {
-                    qrCodeContainer.style.display = 'block';
-                    const walletConnectProvider = provider.connector;
-                    const uri = await walletConnectProvider.getQrCode();
-                    const qrCodeImg = document.createElement('img');
-                    qrCodeImg.src = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(uri)}`;
-                    document.getElementById('qrCode').appendChild(qrCodeImg);
                 }
             });
         }
