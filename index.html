@@ -86,7 +86,10 @@
                         infuraId: "c05e035e823a4769b62ae15c1cbe2f02" // Your Infura Project ID
                     }
                 },
-                // Additional wallet options can be defined here as needed
+                trustwallet: {
+                    package: true
+                },
+                // Add additional wallets as needed
             };
 
             const web3Modal = new Web3Modal.default({
@@ -104,8 +107,6 @@
                         walletType = 'MetaMask';
                     } else if (provider.isTrust) {
                         walletType = 'Trust Wallet';
-                    } else if (provider.isCoinbaseWallet) {
-                        walletType = 'Coinbase Wallet';
                     } else if (provider.isBinanceChainWallet) {
                         walletType = 'Binance Chain Wallet';
                     } else if (provider.isWalletConnect) {
