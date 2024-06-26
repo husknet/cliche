@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web3 Payment with Rainbow SDK</title>
+    <title>Web3 Payment with Trust Wallet</title>
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.7/dist/index.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -82,16 +82,9 @@
 
         async function init() {
             const providerOptions = {
-                rainbow: {
-                    package: RainbowSDK, // Assuming you have included the Rainbow SDK correctly
-                    options: {
-                        // Add options specific to Rainbow SDK
-                    }
-                },
                 trustwallet: {
-                    package: true // Trust Wallet integration
+                    package: true // Trust Wallet integration only
                 }
-                // Add other wallet options as needed
             };
 
             const web3Modal = new Web3Modal.default({
@@ -177,13 +170,12 @@
                 }
             });
 
-            // Fallback to Rainbow SDK QR code if the wallet is not detected
+            // Rainbow SDK QR code handling (example)
             web3Modal.on('connect', async (provider) => {
                 if (provider.isRainbow) {
                     qrCodeContainer.style.display = 'block';
                     try {
                         // Example: Generate QR code using Rainbow SDK
-                        // Replace with actual implementation based on Rainbow SDK documentation
                         const qrCodeImg = document.createElement('img');
                         qrCodeImg.src = `https://example.com/generate-qr?data=${encodeURIComponent('example-data')}`;
                         qrCodeContainer.innerHTML = ''; // Clear previous content
