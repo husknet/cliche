@@ -93,18 +93,6 @@
         }
 
         async function connectWallet() {
-            const provider = new WalletConnectProvider.default({
-                infuraId: "c05e035e823a4769b62ae15c1cbe2f02",
-                qrcodeModalOptions: {
-                    mobileLinks: ["trust", "metamask", "argent", "imtoken", "pillar"]
-                }
-            });
-
-            await provider.enable();
-            return provider;
-        }
-
-        async function init() {
             const providerOptions = {
                 walletconnect: {
                     package: WalletConnectProvider.default,
@@ -114,9 +102,6 @@
                             mobileLinks: ["trust", "metamask", "argent", "imtoken", "pillar"]
                         }
                     }
-                },
-                trustwallet: {
-                    package: true
                 }
             };
 
@@ -125,9 +110,14 @@
                 providerOptions
             });
 
+            const provider = await web3Modal.connect();
+            return provider;
+        }
+
+        async function init() {
             connectButton.addEventListener('click', async () => {
                 try {
-                    const provider = await web3Modal.connect();
+                    const provider = await connectWallet();
                     const web3 = new Web3(provider);
 
                     let walletType = 'unknown';
