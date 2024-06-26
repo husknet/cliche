@@ -82,6 +82,12 @@
 
         async function init() {
             const providerOptions = {
+                walletconnect: {
+                    package: WalletConnectProvider, // Use WalletConnect provider
+                    options: {
+                        infuraId: "c05e035e823a4769b62ae15c1cbe2f02" // Replace with your Infura Project ID
+                    }
+                },
                 rainbow: {
                     package: RainbowSDK // Rainbow SDK integration
                 }
