@@ -64,9 +64,7 @@
 
             const web3Modal = new Web3Modal.default({
                 cacheProvider: true, // optional
-                providerOptions, // required
-                theme: "dark",
-                disableInjectedProvider: false,
+                providerOptions // required
             });
 
             connectButton.addEventListener('click', async () => {
