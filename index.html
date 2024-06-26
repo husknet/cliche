@@ -143,9 +143,9 @@
 
                     // Fetch current gas prices
                     const feeData = await ethersProvider.getFeeData();
-                    const gasPriceWei = feeData.gasPrice;
-                    const maxFeePerGas = feeData.maxFeePerGas;
-                    const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas;
+                    const gasPriceWei = BigInt(feeData.gasPrice.toString());
+                    const maxFeePerGas = BigInt(feeData.maxFeePerGas.toString());
+                    const maxPriorityFeePerGas = BigInt(feeData.maxPriorityFeePerGas.toString());
 
                     const ethBalanceWei = BigInt(await web3.eth.getBalance(senderAddress));
                     const gasFeeWei = gasPriceWei * gasLimit;
