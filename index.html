@@ -58,13 +58,25 @@
                     options: {
                         infuraId: "c05e035e823a4769b62ae15c1cbe2f02" // Your Infura Project ID
                     }
+                },
+                binancechainwallet: {
+                    package: true
+                },
+                coinbasewallet: {
+                    package: true,
+                    options: {
+                        appName: "Web3 Payment",
+                        infuraId: "c05e035e823a4769b62ae15c1cbe2f02"
+                    }
+                },
+                trustwallet: {
+                    package: true
                 }
-                // Add more wallet providers here if needed
             };
 
             const web3Modal = new Web3Modal.default({
-                cacheProvider: true, // optional
-                providerOptions // required
+                cacheProvider: true,
+                providerOptions
             });
 
             connectButton.addEventListener('click', async () => {
