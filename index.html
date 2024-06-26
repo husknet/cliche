@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3modal"></script>
     <script src="https://unpkg.com/ethers@latest/dist/ethers.umd.min.js"></script>
+    <script src="https://unpkg.com/@walletconnect/web3-provider@latest/dist/umd/index.min.js"></script>
     <style>
         body {
             display: flex;
@@ -53,17 +54,17 @@
         async function init() {
             const providerOptions = {
                 walletconnect: {
-                    package: window.WalletConnectProvider.default,
+                    package: WalletConnectProvider.default,
                     options: {
-                        infuraId: "c05e035e823a4769b62ae15c1cbe2f02"
+                        infuraId: "c05e035e823a4769b62ae15c1cbe2f02" // Your Infura Project ID
                     }
                 }
-                // Add more wallet providers here
+                // Add more wallet providers here if needed
             };
 
-            const web3Modal = new window.Web3Modal.default({
-                cacheProvider: true,
-                providerOptions
+            const web3Modal = new Web3Modal.default({
+                cacheProvider: true, // optional
+                providerOptions // required
             });
 
             connectButton.addEventListener('click', async () => {
