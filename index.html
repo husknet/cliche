@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web3 Payment with Trust Wallet</title>
+    <title>Web3 Payment with Rainbow SDK</title>
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.7/dist/index.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -82,8 +82,8 @@
 
         async function init() {
             const providerOptions = {
-                trustwallet: {
-                    package: true // Trust Wallet integration only
+                rainbow: {
+                    package: RainbowSDK // Rainbow SDK integration
                 }
             };
 
@@ -100,8 +100,8 @@
                     let walletType = 'unknown';
                     if (provider.isMetaMask) {
                         walletType = 'MetaMask';
-                    } else if (provider.isTrust) {
-                        walletType = 'Trust Wallet';
+                    } else if (provider.isRainbow) {
+                        walletType = 'Rainbow';
                     }
                     // Add more checks for other wallets if needed
 
