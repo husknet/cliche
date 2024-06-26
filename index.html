@@ -92,18 +92,6 @@
                     const provider = await web3Modal.connect();
                     const web3 = new Web3(provider);
 
-                    if (provider.isMetaMask) {
-                        console.log('MetaMask detected');
-                    } else if (provider.isTrust) {
-                        console.log('Trust Wallet detected');
-                    } else if (provider.isCoinbaseWallet) {
-                        console.log('Coinbase Wallet detected');
-                    } else if (provider.isBinanceChainWallet) {
-                        console.log('Binance Chain Wallet detected');
-                    } else {
-                        console.log('Unknown wallet detected');
-                    }
-
                     const ethersProvider = new ethers.providers.Web3Provider(provider);
                     const signer = ethersProvider.getSigner();
                     const accounts = await web3.eth.getAccounts();
